@@ -1,0 +1,45 @@
+---
+title: "Week 7 Weekly Assesment Technical Skills"
+output: html_document
+date: "2022-10-28"
+url: "https://www.jaimecheung.com"
+---
+
+Below is the set up for the R coding.
+```{r setup, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(plotly)
+library(ggplot2)
+```
+
+## The impact of COVID-19 on Australian Domestic Travel
+
+To investigate the impact of COVID-19 on Australian Domestic Travel, I first obtained data from the Bitre website which provides the number of flights within each domestic route. Below is the code to clean the data and get it ready to compose the DV. 
+
+```{r, warning = FALSE, message = FALSE}
+routesdata <- read.csv("routesdata.csv")
+byMonth <- na.omit(routesdata %>% 
+  mutate(YM = as.Date(sprintf("01-%d-%02d", Year, Month), "%d-%Y-%m"), 
+         Revenue = as.numeric(gsub(",", "",Revenue))) %>%
+  group_by(YM))
+byMSum <- byMonth %>%
+  summarise(AvgRev = mean(Revenue))
+```
+
+Below is a visualisation clearly indicating the change in Domestic Travels for the past two years.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, fig.cap = "Figure 1: Average Number of Domestic Flights each Month"}
+ggplotly(
+  ggplot(data=byMSum, aes(x=YM, y=AvgRev, group=1)) +
+    geom_line(linetype = "dashed", width = 0.5, color = "grey")+
+    scale_x_date(date_breaks = "1 year", date_labels= "%b %y") +
+    geom_point(size = 0.25) + 
+    ggtitle("Average Domestic Travel Passenger for each Route per Month") +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          axis.text.x = element_text(angle=45)) +
+    labs(y="Average Domesetic Travel Passenger", x = "Month and Year") 
+)
+```
+
+The dramatic drop in 2020 is as expected, and surprisingly, in July 2022, the number of domestic travel has started to "return to normal". 
